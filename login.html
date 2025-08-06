@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Signup</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <style>
+    body {
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h3>Login / Signup</h3>
+    <div class="form-group">
+      <label for="username">Enter Username</label>
+      <input id="username" class="form-control" type="text" required />
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="login()">Login</button>
+      <button class="btn btn-secondary" onclick="signup()">Signup</button>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) {
+        alert("Please enter a username.");
+        return;
+      }
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      if (users.includes(username)) {
+        localStorage.setItem("username", username);
+        alert("Login successful!");
+        window.location.href = "task_scheduler.html";
+      } else {
+        alert("User does not exist. Please sign up first.");
+      }
+    }
+
+    function signup() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) {
+        alert("Please enter a username.");
+        return;
+      }
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      if (users.includes(username)) {
+        alert("Username already exists. Please login.");
+        return;
+      }
+      users.push(username);
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("username", username);
+      alert("Signup successful!");
+      window.location.href = "task_scheduler.html";
+    }
+  </script>
+</body>
+</html>
