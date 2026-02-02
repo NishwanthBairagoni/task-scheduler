@@ -1,112 +1,316 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Interactive Dashboard with Task Scheduler</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+      --text-main: #2d3748;
+      --text-secondary: #718096;
+      --accent: #667eea;
+      --danger: #e53e3e;
+      --success: #38a169;
+      --warning: #d69e2e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
+      font-family: 'Inter', sans-serif;
+      background: var(--primary-gradient);
+      min-height: 100vh;
       margin: 0;
-      padding: 20px;
+      padding: 40px 20px;
+      color: var(--text-main);
     }
+
     .navbar {
-      background-color: #343a40;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .container {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .section {
-      background-color: white;
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 16px;
       padding: 20px;
-      border-radius: 8px;
-      flex: 1;
-      min-width: 300px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: var(--glass-shadow);
+      border: var(--glass-border);
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
+
+    .navbar h2 {
+      margin: 0;
+      font-weight: 700;
+      color: #1a202c;
+      letter-spacing: -0.025em;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section {
+      background: var(--glass-bg);
+      backdrop-filter: blur(4px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+      border: var(--glass-border);
+      transition: transform 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateY(-5px);
+    }
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #2d3748;
+      font-size: 1.25rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    /* Form Elements */
+    input[type="text"],
+    input[type="datetime-local"],
+    input[type="month"],
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-success:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: #fff5f5;
+      color: var(--danger);
+      border: 1px solid #fed7d7;
+      margin-top: 20px;
+    }
+
+    .btn-danger:hover {
+      background: #fed7d7;
+    }
+
+    /* Task Items */
     .task-item {
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 5px;
+      background: white;
+      margin-bottom: 12px;
+      padding: 16px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      border-left: 5px solid transparent;
     }
-    .completed {
-      text-decoration: line-through;
-      opacity: 0.7;
+
+    .task-item:hover {
+      transform: translateX(4px);
     }
+
+    .task-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .task-name {
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .task-meta {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 4px;
+    }
+
+    .priority-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Priority Colors */
     .priority-high {
-      color: white;
-      background-color: #dc3545;
+      border-left-color: var(--danger);
     }
+
+    .priority-high .priority-badge {
+      background: #fff5f5;
+      color: var(--danger);
+    }
+
     .priority-medium {
-      color: black;
-      background-color: #ffecb3;
+      border-left-color: var(--warning);
     }
+
+    .priority-medium .priority-badge {
+      background: #fffaf0;
+      color: var(--warning);
+    }
+
     .priority-low {
-      color: white;
-      background-color: #28a745;
+      border-left-color: var(--success);
     }
-    .task-item input[type="checkbox"] {
-      margin-left: 10px;
-      transform: scale(1.2);
+
+    .priority-low .priority-badge {
+      background: #f0fff4;
+      color: var(--success);
+    }
+
+    .completed {
+      opacity: 0.6;
+      background: #f7fafc;
+    }
+
+    .completed .task-name {
+      text-decoration: line-through;
+    }
+
+    /* Checkbox Customization */
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
       cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    /* Chart Container */
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #completionText {
+      text-align: center;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-top: 15px;
+    }
+
+    /* Calendar Tasks */
+    .calendar-task {
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
   </style>
 </head>
+
 <body>
   <div class="navbar">
-    <h2>Welcome to the Productivity Dashboard</h2>
+    <h2>Productivity Dashboard</h2>
   </div>
 
   <div class="container">
+    <!-- Calendar Section -->
     <div class="section">
-      <h4>Calendar</h4>
-      <input type="month" id="calendar" class="form-control" />
-      <div id="calendarTasks" class="mt-3"></div>
+      <h4>Calendar View</h4>
+      <input type="month" id="calendar" />
+      <div id="calendarTasks"></div>
     </div>
 
+    <!-- Analytics Section -->
     <div class="section">
-      <h4>Task Tracker</h4>
-      <canvas id="taskChart" width="200" height="200"></canvas>
+      <h4>Progress Tracker</h4>
+      <div class="chart-container">
+        <canvas id="taskChart"></canvas>
+      </div>
       <p id="completionText"></p>
     </div>
 
+    <!-- Scheduler Section -->
     <div class="section">
-      <h4>Task Scheduler</h4>
-      <input type="text" id="taskName" placeholder="Task name" class="form-control mb-2" />
-      <input type="datetime-local" id="taskTime" class="form-control mb-2" />
-      <select id="taskPriority" class="form-control mb-2">
-        <option value="High">High</option>
-        <option value="Medium" selected>Medium</option>
-        <option value="Low">Low</option>
+      <h4>Add New Task</h4>
+      <input type="text" id="taskName" placeholder="What needs to be done?" />
+      <input type="datetime-local" id="taskTime" />
+      <select id="taskPriority">
+        <option value="High">High Priority</option>
+        <option value="Medium" selected>Medium Priority</option>
+        <option value="Low">Low Priority</option>
       </select>
-      <button class="btn btn-success mb-3" onclick="addTask()">Add Task</button>
-      <div id="taskList"></div>
-      <button class="btn btn-danger mt-3" onclick="clearCompletedTasks()">Clear Completed</button>
+      <button class="btn-success" onclick="addTask()">+ Create Task</button>
+
+      <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
+        <h4 style="border: none; margin-bottom: 15px;">Your Tasks</h4>
+        <div id="taskList"></div>
+        <button class="btn-danger" onclick="clearCompletedTasks()">Clear Completed Tasks</button>
+      </div>
     </div>
   </div>
 
   <script>
-    function getUserTasks() {
-      const username = localStorage.getItem("username") || "default";
-      return JSON.parse(localStorage.getItem(`tasks_${username}`)) || [];
-    }
-
-    function saveUserTasks(tasks) {
-      const username = localStorage.getItem("username") || "default";
-      localStorage.setItem(`tasks_${username}`, JSON.stringify(tasks));
-    }
+    const currentUser = localStorage.getItem("username");
+    const TASK_KEY = "tasks_" + currentUser;
 
     function addTask() {
       const name = document.getElementById("taskName").value.trim();
@@ -114,9 +318,9 @@
       const priority = document.getElementById("taskPriority").value;
       if (!name || !time) return alert("Please fill in all fields.");
 
-      const tasks = getUserTasks();
-      tasks.push({ task: name, time, priority, completed: false, visible: true });
-      saveUserTasks(tasks);
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
+      tasks.push({ task: name, time, priority, completed: false });
+      localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
       document.getElementById("taskName").value = "";
       document.getElementById("taskTime").value = "";
       displayTasks();
@@ -125,19 +329,29 @@
     }
 
     function displayTasks() {
-      const tasks = getUserTasks();
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
       const list = document.getElementById("taskList");
       list.innerHTML = "";
       tasks.forEach((task, i) => {
-        if (task.visible === false) return;
         const div = document.createElement("div");
         let priorityClass =
-          task.priority === "High" ? "priority-high" :
-          task.priority === "Medium" ? "priority-medium" : "priority-low";
+          task.priority === "High"
+            ? "priority-high"
+            : task.priority === "Medium"
+              ? "priority-medium"
+              : "priority-low";
         div.className = "task-item " + priorityClass + (task.completed ? " completed" : "");
+
+        // Format time for better display
+        const dateObj = new Date(task.time);
+        const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         div.innerHTML = `
-          <div>
-            <strong>${task.task}</strong> at ${task.time} [${task.priority}]
+          <div class="task-content">
+            <span class="task-name">${task.task}</span>
+            <div class="task-meta">
+              ${dateStr} <span class="priority-badge">${task.priority}</span>
+            </div>
           </div>
           <input type="checkbox" onchange="toggleComplete(${i})" ${task.completed ? "checked" : ""} />
         `;
@@ -146,28 +360,26 @@
     }
 
     function toggleComplete(index) {
-      const tasks = getUserTasks();
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
       tasks[index].completed = !tasks[index].completed;
-      saveUserTasks(tasks);
+      localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
       displayTasks();
       updateChart();
       updateCalendar();
     }
 
     function clearCompletedTasks() {
-      const tasks = getUserTasks();
-      tasks.forEach(task => {
-        if (task.completed) task.visible = false;
-      });
-      saveUserTasks(tasks);
+      let tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
+      tasks = tasks.filter((task) => !task.completed);
+      localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
       displayTasks();
       updateChart();
       updateCalendar();
     }
 
     function updateChart() {
-      const tasks = getUserTasks();
-      const completed = tasks.filter(t => t.completed).length;
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
+      const completed = tasks.filter((t) => t.completed).length;
       const total = tasks.length;
       const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
       document.getElementById("completionText").innerText = `Completed: ${percent}%`;
@@ -178,49 +390,82 @@
         type: "pie",
         data: {
           labels: ["Completed", "Remaining"],
-          datasets: [{
-            data: [completed, total - completed],
-            backgroundColor: ["#28a745", "#dc3545"],
-          }],
+          datasets: [
+            {
+              data: [completed, total - completed],
+              backgroundColor: ["#38a169", "#e53e3e"],
+              borderWidth: 0
+            },
+          ],
         },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: {
+                  family: "'Inter', sans-serif"
+                }
+              }
+            }
+          }
+        }
       });
     }
 
     function updateCalendar() {
       const selectedMonth = document.getElementById("calendar").value;
-      const tasks = getUserTasks();
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
       const calendarTasks = document.getElementById("calendarTasks");
       calendarTasks.innerHTML = "";
 
-      const filtered = tasks.filter(task => task.time.startsWith(selectedMonth));
-      filtered.forEach(task => {
+      const filtered = tasks.filter((task) => task.time.startsWith(selectedMonth));
+      filtered.forEach((task) => {
         let priorityClass =
-          task.priority === "High" ? "priority-high" :
-          task.priority === "Medium" ? "priority-medium" : "priority-low";
+          task.priority === "High"
+            ? "priority-high"
+            : task.priority === "Medium"
+              ? "priority-medium"
+              : "priority-low";
+
         const div = document.createElement("div");
-        div.innerHTML = `<strong class="${priorityClass}">${task.task}</strong> at ${task.time} [<span class="${priorityClass}">${task.priority}</span>] - ${task.completed ? "✅ Completed" : "❌ Not Completed"}`;
+        div.className = "calendar-task " + priorityClass;
+
+        const timeStr = new Date(task.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        div.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600; ${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.task}</span>
+            <span style="font-size: 0.85em; opacity: 0.7;">${timeStr}</span>
+          </div>
+          <span class="priority-badge">${task.priority}</span>
+        `;
         calendarTasks.appendChild(div);
       });
     }
 
     function checkReminders() {
-      const tasks = getUserTasks();
+      const tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || [];
       const now = new Date();
       tasks.forEach((task, i) => {
         const taskTime = new Date(task.time);
-        if (!task.completed &&
-            taskTime.getFullYear() === now.getFullYear() &&
-            taskTime.getMonth() === now.getMonth() &&
-            taskTime.getDate() === now.getDate() &&
-            taskTime.getHours() === now.getHours() &&
-            taskTime.getMinutes() === now.getMinutes() &&
-            now.getSeconds() === 0) {
+        if (
+          !task.completed &&
+          taskTime.getFullYear() === now.getFullYear() &&
+          taskTime.getMonth() === now.getMonth() &&
+          taskTime.getDate() === now.getDate() &&
+          taskTime.getHours() === now.getHours() &&
+          taskTime.getMinutes() === now.getMinutes() &&
+          now.getSeconds() === 0
+        ) {
           const reschedule = confirm(`Task "${task.task}" is due. Do you want to reschedule it?`);
           if (reschedule) {
             const newTime = prompt("Enter new datetime (YYYY-MM-DDTHH:MM)", task.time);
             if (newTime) {
               tasks[i].time = newTime;
-              saveUserTasks(tasks);
+              localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
               alert("Task rescheduled!");
               displayTasks();
               updateChart();
@@ -234,11 +479,9 @@
     }
 
     document.getElementById("calendar").addEventListener("change", updateCalendar);
-
     displayTasks();
     updateChart();
     updateCalendar();
     setInterval(checkReminders, 1000);
   </script>
 </body>
-</html>
